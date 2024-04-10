@@ -1,0 +1,11 @@
+pub static ENV_FILE_ERROR: &str = "Failed to load .env file";
+pub static PARSE_COMMAND_ERROR: &str = "Failed to parse command";
+pub static ABSENT_ACCESS_TOKEN_ERROR: &str = "Failed to get ACCESS_TOKEN environment variable";
+pub static PREPARE_PARAMETERS_ERROR: &str = "Failed to prepare parameters";
+pub static PREPARE_REQUEST_ERROR: &str = "Failed to prepare request";
+pub static SEND_REQUEST_ERROR: &str = "Failed to send request";
+pub static RESPONSE_CONTENT_ERROR: &str = "Failed to get response content";
+pub static CREATE_FILE_ERROR: &str = "Failed to create file";
+pub static OPEN_FILE_ERROR: &str = "Failed to open file";
+pub static WRITE_FILE_ERROR: &str = "Failed to write content into file";
+pub static READ_FILE_ERROR: &str = "Failed to read file content";

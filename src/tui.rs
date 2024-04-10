@@ -1,4 +1,5 @@
 use crate::app::App;
+use crate::cloud_client::CloudClient;
 use crossterm::event;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use ratatui::{
@@ -12,7 +13,7 @@ pub enum WorkMode {
     Edit,
 }
 
-pub fn ui(frame: &mut Frame, app: &App) {
+pub fn ui<C: CloudClient>(frame: &mut Frame, app: &App<C>) {
     let main_layout = Layout::vertical([
         Constraint::Length(1),
         Constraint::Length(3),
@@ -86,7 +87,10 @@ pub fn ui(frame: &mut Frame, app: &App) {
     frame.render_widget(cloud_entries, info_layout[1]);
 }
 
-pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
+pub fn run_app<B: Backend, C: CloudClient>(
+    terminal: &mut Terminal<B>,
+    mut app: App<C>,
+) -> io::Result<()> {
     loop {
         terminal.draw(|f| ui(f, &app))?;
 

@@ -1,5 +1,7 @@
 mod app;
 mod cli;
+mod cloud_client;
+mod errors;
 mod logger;
 mod tui;
 
@@ -8,6 +10,7 @@ use std::{error::Error, io};
 static APPLICATION_NAME: &str = "csu";
 
 use crate::app::App;
+use crate::cloud_client::dropbox::client::DropboxClient;
 use crate::logger::setup_logger;
 use crate::tui::run_app;
 use crossterm::{
@@ -28,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let app = App::new();
+    let app = App::new(DropboxClient::build()?);
     let res = run_app(&mut terminal, app);
 
     disable_raw_mode()?;

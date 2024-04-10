@@ -1,21 +1,25 @@
 use crate::cli::{Cli, Command, Workspace};
+use crate::cloud_client::CloudClient;
+use crate::errors::PARSE_COMMAND_ERROR;
 use crate::tui::WorkMode;
 use tracing::debug;
 
-pub struct App {
+pub struct App<C: CloudClient> {
     pub input_command: String,
     pub cursor_position: usize,
     pub work_mode: WorkMode,
     pub logs: Vec<String>,
+    pub cloud_client: C,
 }
 
-impl App {
-    pub fn new() -> Self {
+impl<C: CloudClient> App<C> {
+    pub fn new(cloud_client: C) -> Self {
         Self {
             input_command: String::new(),
+            cursor_position: 0,
             work_mode: WorkMode::Read,
             logs: Vec::new(),
-            cursor_position: 0,
+            cloud_client,
         }
     }
 
@@ -63,24 +67,30 @@ impl App {
         self.logs.push(self.input_command.clone());
 
         match Cli::parse_str(&self.input_command) {
-            Ok(cli) => self.execute_command(cli),
-            Err(_) => self.logs.push("Failed to parse command".to_string()),
+            Ok(cli) => match self.execute_command(cli) {
+                Ok(_) => {}
+                Err(error) => self.logs.push(error),
+            },
+            Err(_) => self.logs.push(PARSE_COMMAND_ERROR.to_string()),
         }
 
         self.input_command.clear();
         self.reset_cursor();
     }
 
-    pub fn execute_command(&self, cli: Cli) {
+    pub fn execute_command(&self, cli: Cli) -> Result<(), String> {
         match cli.command {
             Command::Download { from_path, to_path } => {
                 debug!("Downloading... {:?} {:?}", from_path, to_path);
+                self.cloud_client.download(from_path, to_path)?;
             }
             Command::Upload { from_path, to_path } => {
                 debug!("Uploading... {:?} {:?}", from_path, to_path);
+                self.cloud_client.upload(from_path, to_path)?;
             }
             Command::Delete { path } => {
                 debug!("Deleting... {:?}", path);
+                self.cloud_client.delete(path)?;
             }
             Command::List { workspace } => match workspace {
                 Workspace::Local => {
@@ -91,5 +101,6 @@ impl App {
                 }
             },
         }
+        Ok(())
     }
 }
