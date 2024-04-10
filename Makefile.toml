@@ -1,0 +1,10 @@
+[tasks.test]
+dependencies = ["clippy", "format"]
+
+[tasks.build]
+dependencies = ["clippy", "format"]
+
+[tasks.run]
+command = "cargo"
+args = ["run"]
+dependencies = ["clippy", "format"]
