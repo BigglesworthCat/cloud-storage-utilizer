@@ -127,6 +127,10 @@ impl<C: CloudClient> App<C> {
             Command::List => {
                 debug!("Listing entries...");
             }
+            Command::Clear => {
+                debug!("Clearing logs...");
+                self.logs.clear();
+            }
         }
         self.update_workspace_data()?;
         Ok(())

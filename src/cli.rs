@@ -16,6 +16,7 @@ pub enum Command {
         path: PathBuf,
     },
     List,
+    Clear,
 }
 
 #[derive(Parser, Debug)]
@@ -27,10 +28,7 @@ pub struct Cli {
 
 impl Cli {
     pub fn parse_str(input: &String) -> Result<Cli, Error> {
-        let mut command = APPLICATION_NAME.to_string();
-        command.push(' ');
-        command.push_str(input.to_string().trim());
-
+        let command = APPLICATION_NAME.to_string() + " " + input.trim();
         Cli::try_parse_from(command.split(' '))
     }
 }
