@@ -1,0 +1,10 @@
+[package]
+name = "cloud-storage-utilizer"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "csu"
+path = "src/main.rs"
+
+[dependencies]
