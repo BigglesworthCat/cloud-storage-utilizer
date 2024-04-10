@@ -1,5 +1,6 @@
 mod app;
 mod tui;
+mod logger;
 
 use std::{error::Error, io};
 
@@ -11,8 +12,13 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::prelude::*;
+use crate::logger::setup_logger;
 
 fn main() -> Result<(), Box<dyn Error>> {
+    dotenvy::dotenv().expect("Failed to load .env file");
+
+    setup_logger();
+
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;

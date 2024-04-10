@@ -1,3 +1,4 @@
+use tracing::debug;
 use crate::tui::WorkMode;
 
 pub struct App {
@@ -56,6 +57,8 @@ impl App {
     }
 
     pub fn submit_command(&mut self) {
+        debug!("Input command: {}", self.input_command);
+
         self.logs.push(self.input_command.clone());
 
         self.input_command.clear();

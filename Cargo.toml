@@ -8,5 +8,9 @@ name = "csu"
 path = "src/main.rs"
 
 [dependencies]
+dotenvy = "0.15.7"
 crossterm = "0.27.0"
 ratatui = "0.26.1"
+tracing = { version = "0.1.40", features = ["log"] }
+tracing-subscriber = { version = "0.3.18", features = ["registry", "env-filter"] }
+tracing-appender = "0.2.3"
