@@ -8,3 +8,5 @@ name = "csu"
 path = "src/main.rs"
 
 [dependencies]
+crossterm = "0.27.0"
+ratatui = "0.26.1"
