@@ -1,10 +1,14 @@
 mod app;
-mod tui;
+mod cli;
 mod logger;
+mod tui;
 
 use std::{error::Error, io};
 
+static APPLICATION_NAME: &str = "csu";
+
 use crate::app::App;
+use crate::logger::setup_logger;
 use crate::tui::run_app;
 use crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
@@ -12,7 +16,6 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::prelude::*;
-use crate::logger::setup_logger;
 
 fn main() -> Result<(), Box<dyn Error>> {
     dotenvy::dotenv().expect("Failed to load .env file");

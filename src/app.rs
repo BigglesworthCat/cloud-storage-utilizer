@@ -1,5 +1,6 @@
-use tracing::debug;
+use crate::cli::{Cli, Command, Workspace};
 use crate::tui::WorkMode;
+use tracing::debug;
 
 pub struct App {
     pub input_command: String,
@@ -61,7 +62,34 @@ impl App {
 
         self.logs.push(self.input_command.clone());
 
+        match Cli::parse_str(&self.input_command) {
+            Ok(cli) => self.execute_command(cli),
+            Err(_) => self.logs.push("Failed to parse command".to_string()),
+        }
+
         self.input_command.clear();
         self.reset_cursor();
+    }
+
+    pub fn execute_command(&self, cli: Cli) {
+        match cli.command {
+            Command::Download { from_path, to_path } => {
+                debug!("Downloading... {:?} {:?}", from_path, to_path);
+            }
+            Command::Upload { from_path, to_path } => {
+                debug!("Uploading... {:?} {:?}", from_path, to_path);
+            }
+            Command::Delete { path } => {
+                debug!("Deleting... {:?}", path);
+            }
+            Command::List { workspace } => match workspace {
+                Workspace::Local => {
+                    debug!("Listing local entries...")
+                }
+                Workspace::Cloud => {
+                    debug!("Listing cloud entries...")
+                }
+            },
+        }
     }
 }
