@@ -1,12 +1,6 @@
 use crate::APPLICATION_NAME;
-use clap::{Error, Parser, Subcommand, ValueEnum};
+use clap::{Error, Parser, Subcommand};
 use std::path::PathBuf;
-
-#[derive(ValueEnum, Debug, Clone)]
-pub enum Workspace {
-    Local,
-    Cloud,
-}
 
 #[derive(Subcommand, Debug)]
 pub enum Command {
@@ -21,9 +15,7 @@ pub enum Command {
     Delete {
         path: PathBuf,
     },
-    List {
-        workspace: Workspace,
-    },
+    List,
 }
 
 #[derive(Parser, Debug)]

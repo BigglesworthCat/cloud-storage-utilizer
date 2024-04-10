@@ -77,12 +77,11 @@ pub fn ui<C: CloudClient>(frame: &mut Frame, app: &App<C>) {
     let info_layout = Layout::horizontal([Constraint::Percentage(50), Constraint::Percentage(50)])
         .split(storages_area);
 
-    let empty_list: Vec<String> = vec![];
-    let local_entries = List::new(empty_list.iter().cloned())
+    let local_entries = List::new(app.workspace_data.local_entries.iter().cloned())
         .block(Block::default().borders(Borders::ALL).title("Local files"));
     frame.render_widget(local_entries, info_layout[0]);
 
-    let cloud_entries = List::new(empty_list.iter().cloned())
+    let cloud_entries = List::new(app.workspace_data.cloud_entries.iter().cloned())
         .block(Block::default().borders(Borders::ALL).title("Cloud files"));
     frame.render_widget(cloud_entries, info_layout[1]);
 }

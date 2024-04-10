@@ -1,14 +1,35 @@
-use crate::cli::{Cli, Command, Workspace};
+use crate::cli::{Cli, Command};
 use crate::cloud_client::CloudClient;
 use crate::errors::PARSE_COMMAND_ERROR;
 use crate::tui::WorkMode;
+use crate::utilities::files::get_path_entries;
+use std::path::PathBuf;
 use tracing::debug;
+
+pub struct WorkspaceData {
+    pub local_path: PathBuf,
+    pub local_entries: Vec<String>,
+    pub cloud_path: PathBuf,
+    pub cloud_entries: Vec<String>,
+}
+
+impl Default for WorkspaceData {
+    fn default() -> Self {
+        Self {
+            local_path: std::env::current_dir().unwrap_or_default(),
+            local_entries: vec![],
+            cloud_path: PathBuf::from("//"),
+            cloud_entries: vec![],
+        }
+    }
+}
 
 pub struct App<C: CloudClient> {
     pub input_command: String,
     pub cursor_position: usize,
     pub work_mode: WorkMode,
     pub logs: Vec<String>,
+    pub workspace_data: WorkspaceData,
     pub cloud_client: C,
 }
 
@@ -19,6 +40,7 @@ impl<C: CloudClient> App<C> {
             cursor_position: 0,
             work_mode: WorkMode::Read,
             logs: Vec::new(),
+            workspace_data: Default::default(),
             cloud_client,
         }
     }
@@ -78,7 +100,16 @@ impl<C: CloudClient> App<C> {
         self.reset_cursor();
     }
 
-    pub fn execute_command(&self, cli: Cli) -> Result<(), String> {
+    pub fn update_workspace_data(&mut self) -> Result<(), String> {
+        self.workspace_data.local_entries =
+            get_path_entries(self.workspace_data.local_path.as_path());
+        self.workspace_data.cloud_entries = self
+            .cloud_client
+            .list_entries(self.workspace_data.cloud_path.clone())?;
+        Ok(())
+    }
+
+    pub fn execute_command(&mut self, cli: Cli) -> Result<(), String> {
         match cli.command {
             Command::Download { from_path, to_path } => {
                 debug!("Downloading... {:?} {:?}", from_path, to_path);
@@ -92,15 +123,12 @@ impl<C: CloudClient> App<C> {
                 debug!("Deleting... {:?}", path);
                 self.cloud_client.delete(path)?;
             }
-            Command::List { workspace } => match workspace {
-                Workspace::Local => {
-                    debug!("Listing local entries...")
-                }
-                Workspace::Cloud => {
-                    debug!("Listing cloud entries...")
-                }
-            },
+            // Just update folders entry list without performing any operations
+            Command::List => {
+                debug!("Listing entries...");
+            }
         }
+        self.update_workspace_data()?;
         Ok(())
     }
 }

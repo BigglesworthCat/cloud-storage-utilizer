@@ -1,7 +1,9 @@
 use crate::cloud_client::dropbox::api_url::ApiUrl;
 use crate::cloud_client::dropbox::parameters::delete::DeleteParametersBuilder;
 use crate::cloud_client::dropbox::parameters::download::DownloadParametersBuilder;
+use crate::cloud_client::dropbox::parameters::list_folder::ListFolderParametersBuilder;
 use crate::cloud_client::dropbox::parameters::upload::UploadParametersBuilder;
+use crate::cloud_client::dropbox::responses::list_folder::ListFolderResult;
 use crate::cloud_client::CloudClient;
 use crate::errors::{
     ABSENT_ACCESS_TOKEN_ERROR, CREATE_FILE_ERROR, ENV_FILE_ERROR, OPEN_FILE_ERROR,
@@ -14,7 +16,7 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
-use tracing::info;
+use tracing::{debug, info};
 
 static DROPBOX_API_HEADER: &str = "Dropbox-API-Arg";
 
@@ -62,6 +64,7 @@ impl CloudClient for DropboxClient {
             .send()
             .map_err(|_| SEND_REQUEST_ERROR.to_string())?;
 
+        debug!("Response: {:?}", response);
         if response.status().is_success() {
             info!("File has been downloaded");
 
@@ -106,6 +109,7 @@ impl CloudClient for DropboxClient {
             .send()
             .map_err(|_| SEND_REQUEST_ERROR.to_string())?;
 
+        debug!("Response: {:?}", response);
         if response.status().is_success() {
             info!("File has been uploaded");
             Ok(())
@@ -129,9 +133,40 @@ impl CloudClient for DropboxClient {
             .send()
             .map_err(|_| SEND_REQUEST_ERROR.to_string())?;
 
+        debug!("Response: {:?}", response);
         if response.status().is_success() {
             info!("File has been deleted");
             Ok(())
+        } else {
+            Err(RESPONSE_CONTENT_ERROR.to_string())
+        }
+    }
+
+    fn list_entries(&self, path: PathBuf) -> Result<Vec<String>, String> {
+        info!("Listing entries...");
+
+        let url = ApiUrl::ListFolder.to_string();
+        let parameters = ListFolderParametersBuilder::default()
+            .path(path.clone())
+            .limit(Some(2000))
+            .build()
+            .map_err(|_| PREPARE_PARAMETERS_ERROR.to_string())?;
+
+        let response = self
+            .prepare_request(url)
+            .json(&parameters)
+            .send()
+            .map_err(|_| SEND_REQUEST_ERROR.to_string())?;
+
+        debug!("Response: {:?}", response);
+        if response.status().is_success() {
+            info!("Folder entries has been received");
+            let list_folder = response
+                .json::<ListFolderResult>()
+                .map_err(|_| RESPONSE_CONTENT_ERROR.to_string())?
+                .get_simple_list();
+            info!("List: {:?}", list_folder);
+            Ok(list_folder)
         } else {
             Err(RESPONSE_CONTENT_ERROR.to_string())
         }

@@ -4,6 +4,7 @@ mod cloud_client;
 mod errors;
 mod logger;
 mod tui;
+mod utilities;
 
 use std::{error::Error, io};
 

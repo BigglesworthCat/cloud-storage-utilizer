@@ -9,6 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 dotenvy = "0.15.7"
+walkdir = "2.5.0"
 clap = { version = "4.5.4", features = ["derive"] }
 derive_builder = "0.20.0"
 serde = { version = "1.0.197", features = ["derive"] }
