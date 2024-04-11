@@ -16,7 +16,7 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
-use tracing::{debug, info};
+use tracing::{debug, info, instrument};
 
 static DROPBOX_API_HEADER: &str = "Dropbox-API-Arg";
 
@@ -43,6 +43,7 @@ impl DropboxClient {
 }
 
 impl CloudClient for DropboxClient {
+    #[instrument(name = "Dropbox download", skip(self))]
     fn download(&self, from_path: PathBuf, to_path: PathBuf) -> Result<(), String> {
         info!("Downloading...");
 
@@ -81,6 +82,7 @@ impl CloudClient for DropboxClient {
         }
     }
 
+    #[instrument(name = "Dropbox upload", skip(self))]
     fn upload(&self, from_path: PathBuf, to_path: PathBuf) -> Result<(), String> {
         info!("Reading original file");
         let mut file = File::open(from_path).map_err(|_| OPEN_FILE_ERROR.to_string())?;
@@ -116,6 +118,7 @@ impl CloudClient for DropboxClient {
         }
     }
 
+    #[instrument(name = "Dropbox delete", skip(self))]
     fn delete(&self, path: PathBuf) -> Result<(), String> {
         info!("Deleting...");
 
@@ -158,7 +161,7 @@ impl CloudClient for DropboxClient {
 
         debug!("Response: {:?}", response);
         if response.status().is_success() {
-            info!("Folder entries has been received");
+            info!("Cloud folder entries has been received");
             let list_folder = response
                 .json::<ListFolderResult>()
                 .map_err(|_| RESPONSE_CONTENT_ERROR.to_string())?

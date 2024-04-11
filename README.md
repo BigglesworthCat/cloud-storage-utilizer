@@ -24,10 +24,17 @@ cargo install --path .
 
 ## Preparation
 
-At this moment, only [Dropbox] cloud storage is supported. To use it, you need to register your application and get an
+At this moment, only [Dropbox] cloud storage is supported.
+
+### Dropbox
+
+To use [Dropbox] as cloud storage, you need to register your application and get an
 access token following this [instruction](https://www.dropbox.com/developers/reference/getting-started#overview).
 
 This access token must be set into the `ACCESS_TOKEN` environment variable.
+
+Don't forget to give necessary scope access (in *Permissions* tab) for application refresh your token time-to-time (in
+general *Settings* tab).
 
 ## Usage
 
@@ -54,10 +61,12 @@ Supported operations:
 
 ## Problems:
 
-Tangible is entering correct paths to files. For example, for cloud file it may be necessary `/` at the beginning.
+Tangible is entering correct paths to files. For example, for cloud file it may be necessary `/` at the beginning (for
+example, for file `photo.jpg` in root directory you need to write `/photo.jpg` as command argument).
 
 ## To implement:
 
+* Make error messages more informative
 * Ability to change local and cloud working directories
 * Other file operations
 * Implementations for other cloud storages (like [Google Drive])
