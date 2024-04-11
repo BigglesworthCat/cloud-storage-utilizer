@@ -56,6 +56,14 @@ Supported operations:
 
 Tangible is entering correct paths to files. For example, for cloud file it may be necessary `/` at the beginning.
 
+## To implement:
+
+* Ability to change local and cloud working directories
+* Other file operations
+* Implementations for other cloud storages (like [Google Drive])
+
 [`ratatui`]: https://crates.io/crates/ratatui
 
 [Dropbox]: https://www.dropbox.com
+
+[Google Drive]: https://www.google.com/drive
