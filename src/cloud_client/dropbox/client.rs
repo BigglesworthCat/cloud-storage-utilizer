@@ -6,9 +6,9 @@ use crate::cloud_client::dropbox::parameters::upload::UploadParametersBuilder;
 use crate::cloud_client::dropbox::responses::list_folder::ListFolderResult;
 use crate::cloud_client::CloudClient;
 use crate::errors::{
-    ABSENT_ACCESS_TOKEN_ERROR, CREATE_FILE_ERROR, ENV_FILE_ERROR, OPEN_FILE_ERROR,
-    PREPARE_PARAMETERS_ERROR, PREPARE_REQUEST_ERROR, READ_FILE_ERROR, RESPONSE_CONTENT_ERROR,
-    SEND_REQUEST_ERROR, WRITE_FILE_ERROR,
+    ABSENT_ACCESS_TOKEN_ERROR, CREATE_FILE_ERROR, OPEN_FILE_ERROR, PREPARE_PARAMETERS_ERROR,
+    PREPARE_REQUEST_ERROR, READ_FILE_ERROR, RESPONSE_CONTENT_ERROR, SEND_REQUEST_ERROR,
+    WRITE_FILE_ERROR,
 };
 use reqwest::blocking::{Body, Client, RequestBuilder};
 use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
@@ -28,8 +28,6 @@ pub struct DropboxClient {
 
 impl DropboxClient {
     pub fn build() -> Result<DropboxClient, String> {
-        dotenvy::dotenv().map_err(|_| ENV_FILE_ERROR.to_string())?;
-
         let token =
             std::env::var("ACCESS_TOKEN").map_err(|_| ABSENT_ACCESS_TOKEN_ERROR.to_string())?;
         let client = Client::new();

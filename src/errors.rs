@@ -1,4 +1,3 @@
-pub static ENV_FILE_ERROR: &str = "Failed to load .env file";
 pub static PARSE_COMMAND_ERROR: &str = "Failed to parse command";
 pub static ABSENT_ACCESS_TOKEN_ERROR: &str = "Failed to get ACCESS_TOKEN environment variable";
 pub static PREPARE_PARAMETERS_ERROR: &str = "Failed to prepare parameters";

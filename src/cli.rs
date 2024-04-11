@@ -27,7 +27,7 @@ pub struct Cli {
 }
 
 impl Cli {
-    pub fn parse_str(input: &String) -> Result<Cli, Error> {
+    pub fn parse_str(input: &str) -> Result<Cli, Error> {
         let command = APPLICATION_NAME.to_string() + " " + input.trim();
         Cli::try_parse_from(command.split(' '))
     }

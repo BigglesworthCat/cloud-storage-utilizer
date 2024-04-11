@@ -22,9 +22,11 @@ use crossterm::{
 use ratatui::prelude::*;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    dotenvy::dotenv().expect("Failed to load .env file");
+    let _ = dotenvy::dotenv();
 
     setup_logger();
+
+    let cloud_client = DropboxClient::build()?;
 
     enable_raw_mode()?;
     let mut stdout = io::stdout();
@@ -32,7 +34,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let app = App::new(DropboxClient::build()?);
+    let app = App::new(cloud_client);
     let res = run_app(&mut terminal, app);
 
     disable_raw_mode()?;
