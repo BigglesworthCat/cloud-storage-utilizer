@@ -1,5 +1,6 @@
 pub static PARSE_COMMAND_ERROR: &str = "Failed to parse command";
 pub static ABSENT_ACCESS_TOKEN_ERROR: &str = "Failed to get ACCESS_TOKEN environment variable";
+pub static PREPARE_CLOUD_CLIENT_ERROR: &str = "Failed to prepare cloud client";
 pub static PREPARE_PARAMETERS_ERROR: &str = "Failed to prepare parameters";
 pub static PREPARE_REQUEST_ERROR: &str = "Failed to prepare request";
 pub static SEND_REQUEST_ERROR: &str = "Failed to send request";

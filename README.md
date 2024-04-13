@@ -31,7 +31,7 @@ At this moment, only [Dropbox] cloud storage is supported.
 To use [Dropbox] as cloud storage, you need to register your application and get an
 access token following this [instruction](https://www.dropbox.com/developers/reference/getting-started#overview).
 
-This access token must be set into the `ACCESS_TOKEN` environment variable.
+This access token must be set into the `DROPBOX_ACCESS_TOKEN` environment variable.
 
 Don't forget to give necessary scope access (in *Permissions* tab) for application refresh your token time-to-time (in
 general *Settings* tab).

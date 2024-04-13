@@ -6,12 +6,12 @@ use crate::cloud_client::dropbox::parameters::upload::UploadParametersBuilder;
 use crate::cloud_client::dropbox::responses::list_folder::ListFolderResult;
 use crate::cloud_client::CloudClient;
 use crate::errors::{
-    ABSENT_ACCESS_TOKEN_ERROR, CREATE_FILE_ERROR, OPEN_FILE_ERROR, PREPARE_PARAMETERS_ERROR,
-    PREPARE_REQUEST_ERROR, READ_FILE_ERROR, RESPONSE_CONTENT_ERROR, SEND_REQUEST_ERROR,
-    WRITE_FILE_ERROR,
+    ABSENT_ACCESS_TOKEN_ERROR, CREATE_FILE_ERROR, OPEN_FILE_ERROR, PREPARE_CLOUD_CLIENT_ERROR,
+    PREPARE_PARAMETERS_ERROR, PREPARE_REQUEST_ERROR, READ_FILE_ERROR, RESPONSE_CONTENT_ERROR,
+    SEND_REQUEST_ERROR, WRITE_FILE_ERROR,
 };
-use reqwest::blocking::{Body, Client, RequestBuilder};
-use reqwest::header::{AUTHORIZATION, CONTENT_TYPE};
+use reqwest::blocking::{Body, Client, ClientBuilder};
+use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
 use std::fs::File;
 use std::io::Read;
 use std::io::Write;
@@ -22,23 +22,27 @@ static DROPBOX_API_HEADER: &str = "Dropbox-API-Arg";
 
 #[derive(Debug)]
 pub struct DropboxClient {
-    token: String,
     client: Client,
 }
 
 impl DropboxClient {
     pub fn build() -> Result<DropboxClient, String> {
         let token =
-            std::env::var("ACCESS_TOKEN").map_err(|_| ABSENT_ACCESS_TOKEN_ERROR.to_string())?;
-        let client = Client::new();
+            std::env::var("DROPBOX_ACCESS_TOKEN").map_err(|_| ABSENT_ACCESS_TOKEN_ERROR.to_string())?;
+        let token = format!("Bearer {}", token);
 
-        Ok(Self { token, client })
-    }
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            AUTHORIZATION,
+            HeaderValue::from_str(token.as_str()).expect(PREPARE_CLOUD_CLIENT_ERROR),
+        );
 
-    pub fn prepare_request(&self, url: String) -> RequestBuilder {
-        self.client
-            .post(url)
-            .header(AUTHORIZATION, format!("Bearer {}", &self.token))
+        let client = ClientBuilder::new()
+            .default_headers(headers)
+            .build()
+            .expect(PREPARE_CLOUD_CLIENT_ERROR);
+
+        Ok(Self { client })
     }
 }
 
@@ -47,14 +51,14 @@ impl CloudClient for DropboxClient {
     fn download(&self, from_path: PathBuf, to_path: PathBuf) -> Result<(), String> {
         info!("Downloading...");
 
-        let url = ApiUrl::Download.to_string();
         let parameters = DownloadParametersBuilder::default()
             .path(from_path)
             .build()
             .map_err(|_| PREPARE_PARAMETERS_ERROR.to_string())?;
 
         let response = self
-            .prepare_request(url)
+            .client
+            .post(ApiUrl::Download.as_url())
             .header(
                 DROPBOX_API_HEADER,
                 serde_json::to_string(&parameters)
@@ -91,14 +95,14 @@ impl CloudClient for DropboxClient {
             .map_err(|_| READ_FILE_ERROR.to_string())?;
 
         info!("Uploading...");
-        let url = ApiUrl::Upload.to_string();
         let parameters = UploadParametersBuilder::default()
             .path(to_path)
             .build()
             .map_err(|_| PREPARE_REQUEST_ERROR.to_string())?;
 
         let response = self
-            .prepare_request(url)
+            .client
+            .post(ApiUrl::Upload.as_url())
             .header(
                 DROPBOX_API_HEADER,
                 serde_json::to_string(&parameters)
@@ -122,14 +126,14 @@ impl CloudClient for DropboxClient {
     fn delete(&self, path: PathBuf) -> Result<(), String> {
         info!("Deleting...");
 
-        let url = ApiUrl::Delete.to_string();
         let parameters = DeleteParametersBuilder::default()
             .path(path)
             .build()
             .map_err(|_| PREPARE_PARAMETERS_ERROR.to_string())?;
 
         let response = self
-            .prepare_request(url)
+            .client
+            .post(ApiUrl::Delete.as_url())
             .json(&parameters)
             .send()
             .map_err(|_| SEND_REQUEST_ERROR.to_string())?;
@@ -146,7 +150,6 @@ impl CloudClient for DropboxClient {
     fn list_entries(&self, path: PathBuf) -> Result<Vec<String>, String> {
         info!("Listing entries...");
 
-        let url = ApiUrl::ListFolder.to_string();
         let parameters = ListFolderParametersBuilder::default()
             .path(path.clone())
             .limit(Some(2000))
@@ -154,7 +157,8 @@ impl CloudClient for DropboxClient {
             .map_err(|_| PREPARE_PARAMETERS_ERROR.to_string())?;
 
         let response = self
-            .prepare_request(url)
+            .client
+            .post(ApiUrl::ListFolder.as_url())
             .json(&parameters)
             .send()
             .map_err(|_| SEND_REQUEST_ERROR.to_string())?;
