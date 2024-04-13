@@ -1,11 +1,31 @@
-pub static PARSE_COMMAND_ERROR: &str = "Failed to parse command";
-pub static ABSENT_ACCESS_TOKEN_ERROR: &str = "Failed to get ACCESS_TOKEN environment variable";
-pub static PREPARE_CLOUD_CLIENT_ERROR: &str = "Failed to prepare cloud client";
-pub static PREPARE_PARAMETERS_ERROR: &str = "Failed to prepare parameters";
-pub static PREPARE_REQUEST_ERROR: &str = "Failed to prepare request";
-pub static SEND_REQUEST_ERROR: &str = "Failed to send request";
-pub static RESPONSE_CONTENT_ERROR: &str = "Failed to get response content";
-pub static CREATE_FILE_ERROR: &str = "Failed to create file";
-pub static OPEN_FILE_ERROR: &str = "Failed to open file";
-pub static WRITE_FILE_ERROR: &str = "Failed to write content into file";
-pub static READ_FILE_ERROR: &str = "Failed to read file content";
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum AppError {
+    #[error("{0}")]
+    ParseCommand(#[from] clap::error::Error),
+
+    #[error("Access token is absent")]
+    AbsentAccessToken,
+
+    #[error("Failed to prepare cloud client: {0}")]
+    PrepareClient(String),
+
+    #[error("Failed to prepare request parameters")]
+    PrepareRequestParameters,
+
+    #[error("Failed to prepare request")]
+    PrepareRequest,
+
+    #[error("Failed to send request: {0}")]
+    SendRequest(String),
+
+    #[error("Request error: {0}")]
+    Request(String),
+
+    #[error("Response error: {0}")]
+    Response(String),
+
+    #[error("Io error: {0}")]
+    Io(#[from] std::io::Error),
+}

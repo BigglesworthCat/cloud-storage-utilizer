@@ -15,9 +15,7 @@ pub enum Command {
         to_path: PathBuf,
     },
     /// Delete file on cloud storage
-    Delete {
-        path: PathBuf,
-    },
+    Delete { path: PathBuf },
     /// List files on local machine and cloud storage
     List,
     /// Clear logs

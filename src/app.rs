@@ -1,6 +1,6 @@
 use crate::cli::{Cli, Command};
 use crate::cloud_client::CloudClient;
-use crate::errors::PARSE_COMMAND_ERROR;
+use crate::errors::AppError;
 use crate::tui::WorkMode;
 use crate::utilities::files::get_path_entries;
 use std::path::PathBuf;
@@ -91,16 +91,16 @@ impl<C: CloudClient> App<C> {
         match Cli::parse_str(&self.input_command) {
             Ok(cli) => match self.execute_command(cli) {
                 Ok(_) => {}
-                Err(error) => self.logs.push(error),
+                Err(error) => self.logs.push(error.to_string()),
             },
-            Err(_) => self.logs.push(PARSE_COMMAND_ERROR.to_string()),
+            Err(error) => self.logs.push(AppError::ParseCommand(error).to_string()),
         }
 
         self.input_command.clear();
         self.reset_cursor();
     }
 
-    pub fn update_workspace_data(&mut self) -> Result<(), String> {
+    pub fn update_workspace_data(&mut self) -> Result<(), AppError> {
         self.workspace_data.local_entries =
             get_path_entries(self.workspace_data.local_path.as_path());
         self.workspace_data.cloud_entries = self
@@ -109,7 +109,7 @@ impl<C: CloudClient> App<C> {
         Ok(())
     }
 
-    pub fn execute_command(&mut self, cli: Cli) -> Result<(), String> {
+    pub fn execute_command(&mut self, cli: Cli) -> Result<(), AppError> {
         match cli.command {
             Command::Download { from_path, to_path } => {
                 debug!("Downloading... {:?} {:?}", from_path, to_path);
