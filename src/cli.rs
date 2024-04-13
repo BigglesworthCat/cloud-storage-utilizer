@@ -4,18 +4,23 @@ use std::path::PathBuf;
 
 #[derive(Subcommand, Debug)]
 pub enum Command {
+    /// Download file from cloud storage to local machine
     Download {
         from_path: PathBuf,
         to_path: PathBuf,
     },
+    /// Upload file from local machine to cloud storage
     Upload {
         from_path: PathBuf,
         to_path: PathBuf,
     },
+    /// Delete file on cloud storage
     Delete {
         path: PathBuf,
     },
+    /// List files on local machine and cloud storage
     List,
+    /// Clear logs
     Clear,
 }
 
