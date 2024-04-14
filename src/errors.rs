@@ -29,3 +29,10 @@ pub enum AppError {
     #[error("Io error: {0}")]
     Io(#[from] std::io::Error),
 }
+
+pub static  PREPARE_AUTHORIZATION_HEADER_ERROR: &str = "unable to prepare authorization header value";
+pub static BUILD_REQUEST_CLIENT_ERROR: &str = "unable to build request client";
+pub static RESPONSE_BODY_ERROR: &str = "unable to get response content";
+pub static BAD_REQUEST_ERROR: &str = "check your input paths";
+pub static UNAUTHORIZED_ERROR: &str = "check your input paths";
+pub static OTHER_ERROR: &str = "something went wrong";

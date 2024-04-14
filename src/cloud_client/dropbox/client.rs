@@ -5,7 +5,7 @@ use crate::cloud_client::dropbox::parameters::list_folder::ListFolderParametersB
 use crate::cloud_client::dropbox::parameters::upload::UploadParametersBuilder;
 use crate::cloud_client::dropbox::responses::list_folder::ListFolderResult;
 use crate::cloud_client::CloudClient;
-use crate::errors::AppError;
+use crate::errors::{AppError, BAD_REQUEST_ERROR, BUILD_REQUEST_CLIENT_ERROR, RESPONSE_BODY_ERROR, OTHER_ERROR, PREPARE_AUTHORIZATION_HEADER_ERROR, UNAUTHORIZED_ERROR};
 use reqwest::blocking::{Body, Client, ClientBuilder};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE};
 use std::fs::File;
@@ -32,14 +32,14 @@ impl DropboxClient {
         headers.insert(
             AUTHORIZATION,
             HeaderValue::from_str(token.as_str()).map_err(|_| {
-                AppError::PrepareClient("unable to prepare authorization header value".to_string())
+                AppError::PrepareClient(PREPARE_AUTHORIZATION_HEADER_ERROR.to_string())
             })?,
         );
 
         let client = ClientBuilder::new()
             .default_headers(headers)
             .build()
-            .map_err(|_| AppError::PrepareClient("unable to build request client".to_string()))?;
+            .map_err(|_| AppError::PrepareClient(BUILD_REQUEST_CLIENT_ERROR.to_string()))?;
 
         Ok(Self { client })
     }
@@ -72,7 +72,7 @@ impl CloudClient for DropboxClient {
 
                 let bytes = response
                     .bytes()
-                    .map_err(|_| AppError::Response("unable to get response body".to_string()))?;
+                    .map_err(|_| AppError::Response(RESPONSE_BODY_ERROR.to_string()))?;
 
                 let mut file = File::create(to_path).map_err(AppError::Io)?;
                 file.write_all(bytes.as_ref()).map_err(AppError::Io)?;
@@ -80,9 +80,9 @@ impl CloudClient for DropboxClient {
                 info!("File has been saved");
                 Ok(())
             }
-            StatusCode::BAD_REQUEST => Err(AppError::Request("check your input paths".to_string())),
-            StatusCode::UNAUTHORIZED => Err(AppError::Request("check your access token".to_string())),
-            _ => Err(AppError::Request("something went wrong".to_string())),
+            StatusCode::BAD_REQUEST => Err(AppError::Request(BAD_REQUEST_ERROR.to_string())),
+            StatusCode::UNAUTHORIZED => Err(AppError::Request(UNAUTHORIZED_ERROR.to_string())),
+            _ => Err(AppError::Request(OTHER_ERROR.to_string())),
         }
     }
 
@@ -117,9 +117,9 @@ impl CloudClient for DropboxClient {
                 info!("File has been uploaded");
                 Ok(())
             }
-            StatusCode::BAD_REQUEST => Err(AppError::Request("check your input paths".to_string())),
-            StatusCode::UNAUTHORIZED => Err(AppError::Request("check your access token".to_string())),
-            _ => Err(AppError::Request("something went wrong".to_string())),
+            StatusCode::BAD_REQUEST => Err(AppError::Request(BAD_REQUEST_ERROR.to_string())),
+            StatusCode::UNAUTHORIZED => Err(AppError::Request(UNAUTHORIZED_ERROR.to_string())),
+            _ => Err(AppError::Request(OTHER_ERROR.to_string())),
         }
     }
 
@@ -145,9 +145,9 @@ impl CloudClient for DropboxClient {
                 info!("File has been deleted");
                 Ok(())
             }
-            StatusCode::BAD_REQUEST => Err(AppError::Request("check your input paths".to_string())),
-            StatusCode::UNAUTHORIZED => Err(AppError::Request("check your access token".to_string())),
-            _ => Err(AppError::Request("something went wrong".to_string())),
+            StatusCode::BAD_REQUEST => Err(AppError::Request(BAD_REQUEST_ERROR.to_string())),
+            StatusCode::UNAUTHORIZED => Err(AppError::Request(UNAUTHORIZED_ERROR.to_string())),
+            _ => Err(AppError::Request(OTHER_ERROR.to_string())),
         }
     }
 
@@ -173,14 +173,14 @@ impl CloudClient for DropboxClient {
                 info!("Cloud folder entries has been received");
                 let list_folder = response
                     .json::<ListFolderResult>()
-                    .map_err(|_| AppError::Response("unable to get response content".to_string()))?
+                    .map_err(|_| AppError::Response(RESPONSE_BODY_ERROR.to_string()))?
                     .get_simple_list();
                 info!("List: {:?}", list_folder);
                 Ok(list_folder)
             }
-            StatusCode::BAD_REQUEST => Err(AppError::Request("check your input paths".to_string())),
-            StatusCode::UNAUTHORIZED => Err(AppError::Request("check your access token".to_string())),
-            _ => Err(AppError::Request("something went wrong".to_string())),
+            StatusCode::BAD_REQUEST => Err(AppError::Request(BAD_REQUEST_ERROR.to_string())),
+            StatusCode::UNAUTHORIZED => Err(AppError::Request(UNAUTHORIZED_ERROR.to_string())),
+            _ => Err(AppError::Request(OTHER_ERROR.to_string())),
         }
     }
 }
