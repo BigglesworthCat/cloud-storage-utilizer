@@ -44,6 +44,8 @@ After all preparations, you can run the application by typing in the terminal:
 csu
 ```
 
+![Screenshot.jpg](assets/Screenshot.jpg)
+
 Once started, you will be able to perform operations by providing necessary arguments to be executed.
 
 Supported operations:
