@@ -12,6 +12,7 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
+use reqwest::StatusCode;
 use tracing::{debug, info, instrument};
 
 static DROPBOX_API_HEADER: &str = "Dropbox-API-Arg";
@@ -25,7 +26,7 @@ impl DropboxClient {
     pub fn build() -> Result<DropboxClient, AppError> {
         let token =
             std::env::var("DROPBOX_ACCESS_TOKEN").map_err(|_| AppError::AbsentAccessToken)?;
-        let token = format!("Bearer {}", token);
+        let token = format!("Bearer {token}");
 
         let mut headers = HeaderMap::new();
         headers.insert(
@@ -65,8 +66,8 @@ impl CloudClient for DropboxClient {
             .map_err(|error| AppError::SendRequest(error.to_string()))?;
 
         debug!("Response: {:?}", response);
-        match response.status().as_u16() {
-            200 => {
+        match response.status() {
+            StatusCode::OK => {
                 info!("File has been downloaded");
 
                 let bytes = response
@@ -79,8 +80,8 @@ impl CloudClient for DropboxClient {
                 info!("File has been saved");
                 Ok(())
             }
-            400 => Err(AppError::Request("check your input paths".to_string())),
-            401 => Err(AppError::Request("check your access token".to_string())),
+            StatusCode::BAD_REQUEST => Err(AppError::Request("check your input paths".to_string())),
+            StatusCode::UNAUTHORIZED => Err(AppError::Request("check your access token".to_string())),
             _ => Err(AppError::Request("something went wrong".to_string())),
         }
     }
@@ -111,13 +112,13 @@ impl CloudClient for DropboxClient {
             .map_err(|error| AppError::SendRequest(error.to_string()))?;
 
         debug!("Response: {:?}", response);
-        match response.status().as_u16() {
-            200 => {
+        match response.status() {
+            StatusCode::OK => {
                 info!("File has been uploaded");
                 Ok(())
             }
-            400 => Err(AppError::Request("check your input paths".to_string())),
-            401 => Err(AppError::Request("check your access token".to_string())),
+            StatusCode::BAD_REQUEST => Err(AppError::Request("check your input paths".to_string())),
+            StatusCode::UNAUTHORIZED => Err(AppError::Request("check your access token".to_string())),
             _ => Err(AppError::Request("something went wrong".to_string())),
         }
     }
@@ -139,13 +140,13 @@ impl CloudClient for DropboxClient {
             .map_err(|error| AppError::SendRequest(error.to_string()))?;
 
         debug!("Response: {:?}", response);
-        match response.status().as_u16() {
-            200 => {
+        match response.status() {
+            StatusCode::OK => {
                 info!("File has been deleted");
                 Ok(())
             }
-            400 => Err(AppError::Request("check your input paths".to_string())),
-            401 => Err(AppError::Request("check your access token".to_string())),
+            StatusCode::BAD_REQUEST => Err(AppError::Request("check your input paths".to_string())),
+            StatusCode::UNAUTHORIZED => Err(AppError::Request("check your access token".to_string())),
             _ => Err(AppError::Request("something went wrong".to_string())),
         }
     }
@@ -167,8 +168,8 @@ impl CloudClient for DropboxClient {
             .map_err(|error| AppError::SendRequest(error.to_string()))?;
 
         debug!("Response: {:?}", response);
-        match response.status().as_u16() {
-            200 => {
+        match response.status() {
+            StatusCode::OK => {
                 info!("Cloud folder entries has been received");
                 let list_folder = response
                     .json::<ListFolderResult>()
@@ -177,8 +178,8 @@ impl CloudClient for DropboxClient {
                 info!("List: {:?}", list_folder);
                 Ok(list_folder)
             }
-            400 => Err(AppError::Request("check your input paths".to_string())),
-            401 => Err(AppError::Request("check your access token".to_string())),
+            StatusCode::BAD_REQUEST => Err(AppError::Request("check your input paths".to_string())),
+            StatusCode::UNAUTHORIZED => Err(AppError::Request("check your access token".to_string())),
             _ => Err(AppError::Request("something went wrong".to_string())),
         }
     }

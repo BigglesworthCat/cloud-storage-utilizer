@@ -16,7 +16,7 @@ impl ListFolderResult {
             .filter(|md| md.tag != Tag::Deleted)
             .map(|md| {
                 if md.tag == Tag::Folder {
-                    format!("{}/", md.name)
+                    md.name.to_string() + "/"
                 } else {
                     md.name.to_string()
                 }
